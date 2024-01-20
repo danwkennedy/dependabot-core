@@ -1,0 +1,43 @@
+dependabot update -f input.yml --local . -o out.yml --updater-image ghcr.io/dependabot/dependabot-updater-silent
+stderr 'created \| dependency-a \( from 1.2.3 to 1.2.4 \), dependency-b \( from 2.2.3 to 2.2.4 \)'
+
+-- foo/manifest.json --
+{
+  "dependency-a": { "version": "1.2.3" }
+}
+
+-- bar/manifest.json --
+{
+  "dependency-b": { "version": "2.2.3" }
+}
+
+-- dependency-a --
+{
+  "versions": [
+    "1.2.3",
+    "1.2.4"
+  ]
+}
+
+-- dependency-b --
+{
+  "versions": [
+    "2.2.3",
+    "2.2.4"
+  ]
+}
+
+-- input.yml --
+job:
+  package-manager: "silent"
+  source:
+    directories:
+      - "/foo"
+      - "/bar"
+    provider: github
+    repo: dependabot/smoke-tests
+  dependency-groups:
+    - name: first
+      rules:
+        patterns:
+          - "*"
