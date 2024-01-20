@@ -1,9 +1,17 @@
 dependabot update -f input.yml --local . -o out.yml --updater-image ghcr.io/dependabot/dependabot-updater-silent
-stderr 'created | dependency-a ( from 1.2.3 to 9.9.9 )'
+stderr 'created | dependency-a ( from 1.2.3 to 1.2.4 )'
 
 -- manifest.json --
 {
   "dependency-a": { "version": "1.2.3" }
+}
+
+-- dependency-a --
+{
+  "versions": [
+    "1.2.3",
+    "1.2.4"
+  ]
 }
 
 -- input.yml --

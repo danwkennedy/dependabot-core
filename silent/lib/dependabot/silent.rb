@@ -19,5 +19,5 @@ require "dependabot/dependency"
 Dependabot::Dependency
   .register_production_check("silent", ->(_) { true })
 
-#require "dependabot/utils"
-#Dependabot::Utils.register_always_clone("silent")
+require "dependabot/utils"
+Dependabot::Utils.register_always_clone("silent")
