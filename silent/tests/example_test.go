@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"os"
 	"os/exec"
 	"rsc.io/script"
@@ -11,10 +12,12 @@ import (
 )
 
 func TestDependabot(t *testing.T) {
-	out, err := exec.Command("../../script/build", "example").CombinedOutput()
+	log.Println("Building silent ecosystem image...")
+	out, err := exec.Command("../../script/build", "silent").CombinedOutput()
 	if err != nil {
-		t.Fatal("failed to build example ecosystem:\n\n", string(out))
+		t.Fatal("failed to build silent ecosystem image:\n\n", string(out))
 	}
+	log.Println("Building silent ecosystem image... done")
 
 	ctx := context.Background()
 	engine := &script.Engine{

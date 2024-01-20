@@ -4,9 +4,9 @@ Gem::Specification.new do |spec|
   common_gemspec =
     Bundler.load_gemspec_uncached("../common/dependabot-common.gemspec")
 
-  spec.name         = "dependabot-example"
-  spec.summary      = "Example ecosystem"
-  spec.description  = "Example ecosystem"
+  spec.name         = "dependabot-silent"
+  spec.summary      = "Silent ecosystem"
+  spec.description  = "Silent ecosystem"
 
   spec.author       = common_gemspec.author
   spec.email        = common_gemspec.email

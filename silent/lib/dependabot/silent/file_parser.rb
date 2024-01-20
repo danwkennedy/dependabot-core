@@ -5,7 +5,7 @@ require "dependabot/dependency"
 require "dependabot/file_parsers"
 require "dependabot/file_parsers/base"
 
-module ExamplePackageManager
+module SilentPackageManager
   class FileParser < Dependabot::FileParsers::Base
     require "dependabot/file_parsers/base/dependency_set"
 
@@ -13,12 +13,12 @@ module ExamplePackageManager
       dependency_set = DependencySet.new
 
       JSON.parse(dependency_files.first.content).each do |name, info|
-        dependency_set << Dependency.new(
+        dependency_set << Dependabot::Dependency.new(
           name: name,
-          version: info.version,
-          package_manager: "dummy",
+          version: info["version"],
+          package_manager: "silent",
           requirements: [{
-            requirement: info.version,
+            requirement: info["version"],
             file: dependency_files.first.name,
             groups: [],
             source: nil
@@ -40,4 +40,4 @@ module ExamplePackageManager
   end
 end
 
-Dependabot::FileParsers.register("example", ExamplePackageManager::FileParser)
+Dependabot::FileParsers.register("silent", SilentPackageManager::FileParser)

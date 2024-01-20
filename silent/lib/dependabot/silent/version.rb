@@ -4,10 +4,10 @@
 require "dependabot/version"
 require "dependabot/utils"
 
-module ExamplePackageManager
+module SilentPackageManager
   class Version < Dependabot::Version
   end
 end
 
 Dependabot::Utils
-  .register_version_class("example", ExamplePackageManager::Version)
+  .register_version_class("silent", SilentPackageManager::Version)

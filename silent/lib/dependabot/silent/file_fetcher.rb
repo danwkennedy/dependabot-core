@@ -4,7 +4,7 @@
 require "dependabot/file_fetchers"
 require "dependabot/file_fetchers/base"
 
-module ExamplePackageManager
+module SilentPackageManager
   class FileFetcher < Dependabot::FileFetchers::Base
     def fetch_files
       [manifest].compact
@@ -18,7 +18,5 @@ module ExamplePackageManager
   end
 end
 
-puts "HERE"
-
 Dependabot::FileFetchers
-  .register("example", ExamplePackageManager::FileFetcher)
+  .register("silent", SilentPackageManager::FileFetcher)

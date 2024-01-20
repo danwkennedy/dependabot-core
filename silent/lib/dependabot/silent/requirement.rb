@@ -4,7 +4,7 @@
 require "dependabot/requirement"
 require "dependabot/utils"
 
-module ExamplePackageManager
+module SilentPackageManager
   class Requirement < Dependabot::Requirement
     AND_SEPARATOR = /(?<=[a-zA-Z0-9*])\s+(?:&+\s+)?(?!\s*[|-])/
 
@@ -17,4 +17,4 @@ module ExamplePackageManager
 end
 
 Dependabot::Utils
-  .register_requirement_class("example", ExamplePackageManager::Requirement)
+  .register_requirement_class("silent", SilentPackageManager::Requirement)

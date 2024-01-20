@@ -4,7 +4,7 @@
 require "dependabot/file_updaters"
 require "dependabot/file_updaters/base"
 
-module ExamplePackageManager
+module SilentPackageManager
   class FileUpdater < Dependabot::FileUpdaters::Base
     def updated_dependency_files
       updated_files = []
@@ -35,14 +35,13 @@ module ExamplePackageManager
     end
 
     def updated_file_content(file)
-      updated_content = file.content.gsub(
-        /#{dependency.name} = #{previous_requirements(file).first[:requirement]}/,
-        "#{dependency.name} = #{requirements(file).first[:requirement]}"
-      )
+      original_content = JSON.parse(file.content)
+      original_content.each do |name, info|
+        next unless name == dependency.name
 
-      raise "Expected content to change!" if updated_content == file.content
-
-      updated_content
+        info["version"] = requirements(file).first[:requirement]
+      end
+      JSON.pretty_generate(original_content)
     end
 
     def requirements(file)
@@ -57,4 +56,4 @@ module ExamplePackageManager
   end
 end
 
-Dependabot::FileUpdaters.register("example", ExamplePackageManager::FileUpdater)
+Dependabot::FileUpdaters.register("silent", SilentPackageManager::FileUpdater)

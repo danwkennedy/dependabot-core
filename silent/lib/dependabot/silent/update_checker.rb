@@ -5,7 +5,7 @@ require "dependabot/update_checkers"
 require "dependabot/update_checkers/base"
 require "dependabot/errors"
 
-module ExamplePackageManager
+module SilentPackageManager
   class UpdateChecker < Dependabot::UpdateCheckers::Base
     def latest_version
       "9.9.9"
@@ -31,4 +31,4 @@ module ExamplePackageManager
   end
 end
 
-Dependabot::UpdateCheckers.register("example", ExamplePackageManager::UpdateChecker)
+Dependabot::UpdateCheckers.register("silent", SilentPackageManager::UpdateChecker)
