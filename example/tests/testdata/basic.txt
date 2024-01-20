@@ -1,0 +1,7 @@
+dependabot update example a/b --local . -o out.yml --updater-image ghcr.io/dependabot/dependabot-updater-example
+stdout blah
+
+-- manifest.json --
+{
+  "dependency-a": "1.0.0"
+}
