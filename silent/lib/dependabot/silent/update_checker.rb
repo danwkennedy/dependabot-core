@@ -44,9 +44,12 @@ module SilentPackageManager
     def available_versions
       return @available_versions if defined? @available_versions
 
+      version_file = File.join(repo_contents_path, dependency.name)
+      return [] unless File.exist?(version_file)
+
       # the available versions are stored in a file in the repo
       # that's why this package manager is silent, makes no requests
-      contents = File.read(File.join(repo_contents_path, dependency.name))
+      contents = File.read(version_file)
       available_versions = JSON.parse(contents)["versions"]
       @available_versions = available_versions.map { |v| SilentPackageManager::Version.new(v) }
     rescue JSON::ParserError

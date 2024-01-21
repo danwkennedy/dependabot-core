@@ -27,6 +27,8 @@ module SilentPackageManager
       end
 
       dependency_set.dependencies
+    rescue JSON::ParserError
+      raise Dependabot::DependencyFileNotParseable, dependency_files.first.path
     end
 
     private
