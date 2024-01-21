@@ -9,7 +9,10 @@ require "dependabot/update_checkers/version_filters"
 module SilentPackageManager
   class UpdateChecker < Dependabot::UpdateCheckers::Base
     def latest_version
-      available_versions.max.to_s
+      versions = available_versions
+      versions = filter_lower_versions(versions)
+      versions = filter_ignored_versions(versions)
+      versions.max.to_s
     end
 
     def lowest_security_fix_version
@@ -40,6 +43,17 @@ module SilentPackageManager
     end
 
     private
+
+    def filter_lower_versions(versions)
+      versions.reject { |v| v < version_class.new(dependency.version) }
+    end
+
+    def filter_ignored_versions(versions)
+      filtered = versions.reject { |v| ignore_requirements.any? { |r| r.satisfied_by?(v) } }
+      return filtered unless versions.any? && filtered.empty? && raise_on_ignored
+
+      raise Dependabot::AllVersionsIgnored
+    end
 
     def available_versions
       return @available_versions if defined? @available_versions
