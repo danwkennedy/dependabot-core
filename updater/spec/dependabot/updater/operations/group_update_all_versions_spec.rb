@@ -242,57 +242,6 @@ RSpec.describe Dependabot::Updater::Operations::GroupUpdateAllVersions do
 
       group_update_all.perform
     end
-
-    context "when the update fails and there are no semver rules" do
-      before do
-        allow_any_instance_of(Dependabot::Updater::Operations::CreateGroupUpdatePullRequest)
-          .to receive(:perform)
-          .and_return(nil)
-      end
-
-      it "does not try to create an individual PR" do
-        group_update_all.perform
-
-        expect(dependency_snapshot.ungrouped_dependencies).to be_empty
-      end
-    end
-  end
-
-  context "when the snapshot is updating several peer manifests" do
-    let(:job_definition) do
-      job_definition_fixture("dummy/version_updates/group_update_peer_manifests")
-    end
-
-    let(:dependency_files) do
-      [
-        Dependabot::DependencyFile.new(
-          name: "a.dummy",
-          content: fixture("dummy/original/a.dummy"),
-          directory: "/dummy"
-        ),
-        Dependabot::DependencyFile.new(
-          name: "b.dummy",
-          content: fixture("dummy/original/b.dummy"),
-          directory: "/dummy"
-        )
-      ]
-    end
-
-    it "creates a DependencyChange for both of the manifests without reporting errors" do
-      expect(mock_service).to receive(:create_pull_request) do |dependency_change|
-        expect(dependency_change.dependency_group.name).to eql("dependabot-core-images")
-
-        # We updated the right depednencies
-        expect(dependency_change.updated_dependencies.length).to eql(2)
-        expect(dependency_change.updated_dependencies.map(&:name)).to eql(%w(dependabot/a dependabot/b))
-
-        # We updated the right files.
-        expect(dependency_change.updated_dependency_files_hash.length).to eql(2)
-        expect(dependency_change.updated_dependency_files.map(&:name)).to eql(%w(a.dummy b.dummy))
-      end
-
-      group_update_all.perform
-    end
   end
 
   context "when the snapshot is updating vendored dependencies", :vcr do

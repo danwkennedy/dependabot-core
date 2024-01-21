@@ -7,6 +7,8 @@ require "dependabot/file_updaters/base"
 module SilentPackageManager
   class FileUpdater < Dependabot::FileUpdaters::Base
     def updated_dependency_files
+      return [] if dependency.name == "dont-update-any-files"
+
       updated_files = []
       dependency_files.each do |file|
         next unless requirement_changed?(file, dependency)

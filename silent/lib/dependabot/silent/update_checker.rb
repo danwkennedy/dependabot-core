@@ -10,14 +10,15 @@ module SilentPackageManager
   class UpdateChecker < Dependabot::UpdateCheckers::Base
     def latest_version
       versions = available_versions
-      versions = filter_lower_versions(versions)
       versions = filter_ignored_versions(versions)
       versions.max.to_s
     end
 
     def lowest_security_fix_version
+      versions = available_versions
+      versions = filter_lower_versions(versions)
       Dependabot::UpdateCheckers::VersionFilters.filter_vulnerable_versions(
-        available_versions,
+        versions,
         security_advisories
       ).min.to_s
     end
