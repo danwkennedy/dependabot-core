@@ -1,9 +1,16 @@
 dependabot update -f input.yml --local . --updater-image ghcr.io/dependabot/dependabot-updater-silent
 stderr 'created \| dependency-a \( from 1.2.3 to 1.2.4 \)'
+pr-created expected.json
 
 -- manifest.json --
 {
   "dependency-a": { "version": "1.2.3" },
+  "dependency-b": { "version": "2.3.4" }
+}
+
+-- expected.json --
+{
+  "dependency-a": { "version": "1.2.4" },
   "dependency-b": { "version": "2.3.4" }
 }
 
