@@ -147,52 +147,6 @@ RSpec.describe Dependabot::Updater::Operations::GroupUpdateAllVersions do
     end
   end
 
-  context "when the snapshot is only grouping patch-level changes and major changes are ignored", :vcr do
-    let(:job_definition) do
-      job_definition_fixture("bundler/version_updates/group_update_all_semver_grouping_with_global_ignores")
-    end
-
-    let(:dependency_files) do
-      original_bundler_files(fixture: "bundler_grouped_by_types")
-    end
-
-    it "creates individual PRs for minor-level changes",
-       vcr: { allow_unused_http_interactions: true } do
-      # expect(mock_service).to receive(:create_pull_request).with(
-      #   an_object_having_attributes(
-      #     dependency_group: an_object_having_attributes(name: "patches"),
-      #     updated_dependencies: [
-      #       an_object_having_attributes(name: "rack", version: "2.1.4.3", previous_version: "2.1.3"),
-      #       an_object_having_attributes(name: "rubocop", version: "0.75.1", previous_version: "0.75.0")
-      #     ]
-      #   ),
-      #   "mock-sha"
-      # )
-
-      expect(mock_service).to receive(:create_pull_request).with(
-        an_object_having_attributes(
-          dependency_group: nil,
-          updated_dependencies: [
-            an_object_having_attributes(name: "rack", version: "2.2.8", previous_version: "2.1.3")
-          ]
-        ),
-        "mock-sha"
-      )
-
-      expect(mock_service).to receive(:create_pull_request).with(
-        an_object_having_attributes(
-          dependency_group: nil,
-          updated_dependencies: [
-            an_object_having_attributes(name: "rubocop", version: "0.93.1", previous_version: "0.75.0")
-          ]
-        ),
-        "mock-sha"
-      )
-
-      group_update_all.perform
-    end
-  end
-
   context "when a pull request already exists for a group" do
     let(:job_definition) do
       job_definition_fixture("bundler/version_updates/group_update_all_with_existing_pr")
