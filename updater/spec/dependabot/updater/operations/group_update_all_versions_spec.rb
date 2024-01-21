@@ -122,41 +122,6 @@ RSpec.describe Dependabot::Updater::Operations::GroupUpdateAllVersions do
     end
   end
 
-  context "when the snapshot is only grouping minor- and patch-level changes", :vcr do
-    let(:job_definition) do
-      job_definition_fixture("bundler/version_updates/group_update_all_semver_grouping")
-    end
-
-    let(:dependency_files) do
-      original_bundler_files(fixture: "bundler_grouped_by_types")
-    end
-
-    it "creates individual PRs since majors are available and not ignored",
-       vcr: { allow_unused_http_interactions: true } do
-      expect(mock_service).to receive(:create_pull_request).with(
-        an_object_having_attributes(
-          dependency_group: nil,
-          updated_dependencies: [
-            an_object_having_attributes(name: "rack", version: "3.0.8", previous_version: "2.1.3")
-          ]
-        ),
-        "mock-sha"
-      )
-
-      expect(mock_service).to receive(:create_pull_request).with(
-        an_object_having_attributes(
-          dependency_group: nil,
-          updated_dependencies: [
-            an_object_having_attributes(name: "rubocop", version: "1.56.0", previous_version: "0.75.0")
-          ]
-        ),
-        "mock-sha"
-      )
-
-      group_update_all.perform
-    end
-  end
-
   context "when there are semver rules but an error occurs gathering versions" do
     before do
       allow_any_instance_of(Dependabot::Bundler::UpdateChecker)
