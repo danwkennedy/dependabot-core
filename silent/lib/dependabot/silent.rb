@@ -17,7 +17,7 @@ Dependabot::PullRequestCreator::Labeler
 
 require "dependabot/dependency"
 Dependabot::Dependency
-  .register_production_check("silent", ->(_) { true })
+  .register_production_check("silent", ->(groups) { groups.empty? || groups.include?("prod") })
 
 require "dependabot/utils"
 Dependabot::Utils.register_always_clone("silent")

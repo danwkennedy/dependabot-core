@@ -93,56 +93,6 @@ RSpec.describe Dependabot::Updater::Operations::GroupUpdateAllVersions do
     end
   end
 
-  context "when the snapshop is updating dependencies split by dependency-type", :vcr do
-    let(:job_definition) do
-      job_definition_fixture("bundler/version_updates/group_update_all_by_dependency_type")
-    end
-
-    let(:dependency_files) do
-      original_bundler_files(fixture: "bundler_grouped_by_types")
-    end
-
-    it "creates separate pull requests for development and production dependencies" do
-      expect(mock_service).to receive(:create_pull_request) do |dependency_change|
-        expect(dependency_change.dependency_group.name).to eql("dev-dependencies")
-
-        # We updated the right dependencies
-        expect(dependency_change.updated_dependencies.map(&:name)).to eql(%w(rubocop))
-
-        # We've updated the gemfiles properly
-        gemfile = dependency_change.updated_dependency_files.find do |file|
-          file.path == "/Gemfile"
-        end
-        expect(gemfile.content).to eql(fixture("bundler_grouped_by_types/updated_development_deps/Gemfile"))
-
-        gemfile_lock = dependency_change.updated_dependency_files.find do |file|
-          file.path == "/Gemfile.lock"
-        end
-        expect(gemfile_lock.content).to include("rubocop (1.56.0)").and include("rack (2.1.3)")
-      end
-
-      expect(mock_service).to receive(:create_pull_request) do |dependency_change|
-        expect(dependency_change.dependency_group.name).to eql("production-dependencies")
-
-        # We updated the right dependencies
-        expect(dependency_change.updated_dependencies.map(&:name)).to eql(%w(rack))
-
-        # We've updated the gemfiles properly
-        gemfile = dependency_change.updated_dependency_files.find do |file|
-          file.path == "/Gemfile"
-        end
-        expect(gemfile.content).to eql(fixture("bundler_grouped_by_types/updated_production_deps/Gemfile"))
-
-        gemfile_lock = dependency_change.updated_dependency_files.find do |file|
-          file.path == "/Gemfile.lock"
-        end
-        expect(gemfile_lock.content).to include("rubocop (0.75.0)").and include("rack (3.0.8)")
-      end
-
-      group_update_all.perform
-    end
-  end
-
   context "when the snapshot contains a git dependency" do
     let(:job_definition) do
       job_definition_fixture("bundler/version_updates/group_update_all_semver_grouping")

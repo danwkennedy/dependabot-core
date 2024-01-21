@@ -20,7 +20,7 @@ module SilentPackageManager
           requirements: [{
             requirement: info["version"],
             file: dependency_files.first.name,
-            groups: [],
+            groups: [info["group"]].compact,
             source: nil
           }]
         )
