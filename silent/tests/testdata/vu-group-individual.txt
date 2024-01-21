@@ -57,7 +57,9 @@ job:
   package-manager: "silent"
   source:
     directory: "/"
-    provider: github
+    provider: example
+    hostname: example.com
+    api-endpoint: https://example.com/api/v3
     repo: dependabot/smoke-tests
   dependency-groups:
     - name: first

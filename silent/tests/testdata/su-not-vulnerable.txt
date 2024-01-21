@@ -32,7 +32,9 @@ job:
     - dependency-a
   source:
     directory: "/"
-    provider: github
+    provider: example
+    hostname: example.com
+    api-endpoint: https://example.com/api/v3
     repo: dependabot/smoke-tests
   security-advisories:
     - dependency-name: dependency-a
