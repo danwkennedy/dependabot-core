@@ -1,5 +1,5 @@
-dependabot update -f input.yml --local . -o out.yml --updater-image ghcr.io/dependabot/dependabot-updater-silent
-stderr 'created \| dependency-a \( from 1.2.3 to 1.2.4 \), dependency-b \( from 2.2.3 to 2.2.4 \)'
+dependabot update -f input.yml --local . --updater-image ghcr.io/dependabot/dependabot-updater-silent
+pr-created foo/manifest.json bar/manifest.json
 
 -- foo/manifest.json --
 {
@@ -11,11 +11,22 @@ stderr 'created \| dependency-a \( from 1.2.3 to 1.2.4 \), dependency-b \( from 
   "dependency-b": { "version": "2.2.3" }
 }
 
+-- foo/expected.json --
+{
+  "dependency-a": { "version": "1.2.5" }
+}
+
+-- bar/expected.json --
+{
+  "dependency-b": { "version": "2.2.5" }
+}
+
 -- dependency-a --
 {
   "versions": [
     "1.2.3",
-    "1.2.4"
+    "1.2.4",
+    "1.2.5"
   ]
 }
 
@@ -23,7 +34,8 @@ stderr 'created \| dependency-a \( from 1.2.3 to 1.2.4 \), dependency-b \( from 
 {
   "versions": [
     "2.2.3",
-    "2.2.4"
+    "2.2.4",
+    "2.2.5"
   ]
 }
 

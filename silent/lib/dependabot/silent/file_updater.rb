@@ -41,7 +41,9 @@ module SilentPackageManager
 
         info["version"] = requirements(file).first[:requirement]
       end
-      JSON.pretty_generate(original_content)
+      c = JSON.pretty_generate(original_content)
+      puts c
+      c
     end
 
     def requirements(file)
