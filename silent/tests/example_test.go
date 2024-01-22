@@ -46,6 +46,7 @@ func Commands() map[string]script.Cmd {
 	// additional Dependabot commands
 	commands["dependabot"] = script.Program("dependabot", nil, 100*time.Millisecond)
 	commands["pr-created"] = PRCreated()
+	commands["pr-updated"] = PRUpdated()
 
 	return commands
 }
@@ -74,71 +75,94 @@ func PRCreated() script.Cmd {
 				"Asserts a PR was created that has content that matches the given files.",
 			},
 			RegexpArgs: nil,
-		},
-		func(s *script.State, args ...string) (script.WaitFunc, error) {
-			expected := []any{}
-			for _, arg := range args {
-				f, err := os.Open(s.Path(arg))
-				if err != nil {
-					return nil, fmt.Errorf("failed to read file %s: %w", arg, err)
-				}
-				var expect any
-				if err = json.NewDecoder(f).Decode(&expect); err != nil {
-					return nil, fmt.Errorf("failed to decode expected file %s: %w", arg, err)
-				}
-				expected = append(expected, expect)
+		}, prChecker("create_pull_request"))
+}
+
+func PRUpdated() script.Cmd {
+	return script.Command(
+		script.CmdUsage{
+			Summary: "find lines in the stderr buffer that match a pattern",
+			Args:    "pr <file1> [<file2>...]",
+			Detail: []string{
+				"Asserts a PR was created that has content that matches the given files.",
+			},
+			RegexpArgs: nil,
+		}, prChecker("update_pull_request"))
+}
+
+func prChecker(prType string) func(s *script.State, args ...string) (script.WaitFunc, error) {
+	return func(s *script.State, args ...string) (script.WaitFunc, error) {
+		expected := []any{}
+		for _, arg := range args {
+			f, err := os.Open(s.Path(arg))
+			if err != nil {
+				return nil, fmt.Errorf("failed to read file %s: %w", arg, err)
 			}
-			if len(expected) == 0 {
-				return nil, fmt.Errorf("no files provided")
+			var expect any
+			if err = json.NewDecoder(f).Decode(&expect); err != nil {
+				return nil, fmt.Errorf("failed to decode expected file %s: %w", arg, err)
+			}
+			expected = append(expected, expect)
+		}
+		if len(expected) == 0 {
+			return nil, fmt.Errorf("no files provided")
+		}
+
+		scanner := bufio.NewScanner(strings.NewReader(s.Stdout()))
+		var totalPRsCreated int
+		for scanner.Scan() {
+			var pr CreatePR
+			err := json.Unmarshal([]byte(scanner.Text()), &pr)
+			if err != nil {
+				return nil, fmt.Errorf("failed to decode line %s: %w", scanner.Text(), err)
+			}
+			if pr.Type != prType {
+				continue
 			}
 
-			scanner := bufio.NewScanner(strings.NewReader(s.Stdout()))
-			var totalPRsCreated int
-			for scanner.Scan() {
-				var pr CreatePR
-				err := json.Unmarshal([]byte(scanner.Text()), &pr)
-				if err != nil {
-					return nil, fmt.Errorf("failed to decode line %s: %w", scanner.Text(), err)
-				}
-				if pr.Type != "create_pull_request" {
-					continue
-				}
+			totalPRsCreated++
+			if len(pr.Data.UpdatedDependencyFiles) == 0 {
+				return nil, fmt.Errorf("no updated dependency files")
+			}
+			if len(pr.Data.UpdatedDependencyFiles) != len(args) {
+				continue
+			}
 
-				totalPRsCreated++
-				if len(pr.Data.UpdatedDependencyFiles) == 0 {
-					return nil, fmt.Errorf("no updated dependency files")
+			var prsFound int
+			for _, file := range pr.Data.UpdatedDependencyFiles {
+				var actual any
+				if err = json.Unmarshal([]byte(file.Content), &actual); err != nil {
+					return nil, fmt.Errorf("failed to decode actual file %s: %w", file.Name, err)
 				}
-				if len(pr.Data.UpdatedDependencyFiles) != len(args) {
-					continue
-				}
-
-				var prsFound int
-				for _, file := range pr.Data.UpdatedDependencyFiles {
-					var actual any
-					if err = json.Unmarshal([]byte(file.Content), &actual); err != nil {
-						return nil, fmt.Errorf("failed to decode actual file %s: %w", file.Name, err)
-					}
-					found := false
-					for _, expect := range expected {
-						if reflect.DeepEqual(actual, expect) {
-							prsFound++
-							found = true
-							break
-						}
-					}
-					if !found {
+				found := false
+				for _, expect := range expected {
+					if reflect.DeepEqual(actual, expect) {
+						prsFound++
+						found = true
 						break
 					}
 				}
-				if prsFound == len(args) {
-					return nil, nil
+				if !found {
+					break
 				}
 			}
+			if prsFound == len(args) {
+				return nil, nil
+			}
+		}
 
-			if totalPRsCreated > 0 {
+		if totalPRsCreated > 0 {
+			if prType == "create_pull_request" {
 				return nil, fmt.Errorf("%v PRs created but none matched", totalPRsCreated)
 			} else {
-				return nil, fmt.Errorf("no PR created")
+				return nil, fmt.Errorf("%v PRs updated but none matched", totalPRsCreated)
 			}
-		})
+		} else {
+			if prType == "create_pull_request" {
+				return nil, fmt.Errorf("no PR created")
+			} else {
+				return nil, fmt.Errorf("no PR updated")
+			}
+		}
+	}
 }
